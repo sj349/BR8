@@ -4,6 +4,12 @@ author: "Steph Jordan"
 output: html_notebook
 ---
 
+```{r}
+library(bayesrules)
+library(tidyverse)
+```
+
+
 ## Exercise 8.1
 
 1. develop the prior model
@@ -38,7 +44,25 @@ b. How many of the incoming students will major in computer science.
 
 c. It is conditional on both the data and the parameter. 
 
+## Exercise 8.6
 
- 
+a. We'll use cbeta()
+```{r}
+qbeta(c(0.05, 0.95), 4, 5)
+```
+
+b. We'll use cbeta()
+```{r}
+qbeta(c(0.3, 0.9), 4, 5)
+```
+
+c. We'll use cgamma()
+```{r}
+qgamma(c(0.05, 0.95), 1, 8)
+```
+
+## Exercise 8.7 
+
+a. We'll use qgamma()
 
 
