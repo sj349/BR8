@@ -1,0 +1,44 @@
+---
+title: "BR8"
+author: "Steph Jordan"
+output: html_notebook
+---
+
+## Exercise 8.1
+
+1. develop the prior model
+2. collect data
+3. develop the posterior model by combining the data and the prior model
+
+## Exercise 8.2
+ a. The main drawback is that this is only one estimate of the posterior lambda; different posterior models could have yielded a range of different lambdas. What is more useful is to present the lambda value and the confidence interval associated with it. 
+ 
+ b. There's a 95% chance that lambda will fall between 1 and 3.4. 
+ 
+## Exercise 8.3
+
+a. Yes: >40% of dogs have a license (hypothesis), <40% of dogs have a license (null hypothesis)
+b. No--no specific proposal to test
+c. Yes: >60% of voters support a new regulation, <60% of voters support the regulation
+d. No--"about" 3 is not precise enough (we need greater than, less than, or equal to in order to formulate a hypothesis and null hypothesis)
+
+## Exercise 8.4
+
+a. Posterior odds is the "odds" form of posterior probability. It is the probability that a hypothesis is true given observation of a certain outcome divided by the probability that a hypothesis is false given observation of a certain outcome. In other words, its the likelihood, given the fact that a certain condition is true, of the hypothesis being true. 
+
+b. Prior odds is simply the probability that a certain condition is true divided by the probability that it is false. There is no prior, previous condition here. 
+
+c. Bayes factor is the ratio of posterior odds to prior odds. It demonstrates how much our understanding of the hypothesis changed given our observed data. 
+
+## Exercise 8.5
+
+a. Sampling variability in the data (the mean observed depends on the exact random sample we get) and posterior variability in pi (our confidence interval illustrates our confidence in the mean posterior probability). The former refers to deviation in all the samples we could draw from our population; the latter refers to the fact that our posterior estimate for the average is still just an estimate--it is not *the* average. Therefore, we must consider all possible values of pi, even though some are more likely than others. 
+
+b. How many of the incoming students will major in computer science. 
+
+c. It is conditional on both the data and the parameter. 
+
+
+ 
+
+
