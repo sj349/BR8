@@ -46,23 +46,181 @@ c. It is conditional on both the data and the parameter.
 
 ## Exercise 8.6
 
-a. We'll use cbeta()
+a. We'll use qbeta()
 ```{r}
-qbeta(c(0.05, 0.95), 4, 5)
+qbeta(c(0.025, 0.975), 4, 5)
 ```
 
-b. We'll use cbeta()
+b. We'll use qbeta()
 ```{r}
-qbeta(c(0.3, 0.9), 4, 5)
+qbeta(c(0.2, 0.8), 4, 5)
 ```
 
-c. We'll use cgamma()
+c. We'll use qgamma()
 ```{r}
-qgamma(c(0.05, 0.95), 1, 8)
+qgamma(c(0.025, 0.975), 1, 8)
 ```
 
 ## Exercise 8.7 
 
 a. We'll use qgamma()
+
+```{r}
+qgamma(c(0.005, 0.995), 1, 5)
+```
+
+b. We'll use qnorm()
+
+```{r}
+qnorm(c(0.025, 0.975), 10, 2)
+```
+
+c. We'll use qnorm()
+
+```{r}
+qnorm(c(0.005, 0.995), -3, 1)
+```
+
+## Exercise 8.8
+
+a. We will first plot the distribution to see visually where the top 95% might be.
+```{r}
+plot_gamma(1, 5)
+```
+We know from this plot that the bottom of the confidence interval will be percentile 0 (lambda==0), and we can use our quantile function to figure out where 0+95=95th percentile is. 
+
+```{r}
+qgamma(c(0, 0.95), 1, 5)
+```
+The confidence interval is (0, 0.599)
+
+b. Using the middle 95 approach, we get:
+```{r}
+qgamma(c(0.025, 0.975), 1, 5)
+```
+
+c. They are not the same. The middle 95% reaches a significantly higher upper bound than the highest posterior density credible interval. The highest posterior density credible interval is more applicable here, because the graph is significiantly skewed, so it produces a more accurate estimation of the range of values of pi than the middle 95% estimation. 
+
+d. We'll start by plotting the distribution
+```{r}
+plot_normal(-13, 2)
+```
+
+Since the majority of values are distributed symmetrically around the mean/mode (-13), we know the highest 95% interval will be equivalent to the middle 95%. Therefore, we can use our known quantile calculations to determine the highest 95% interval.
+
+```{r}
+qnorm(c(0.025, 0.0975), -13, 2)
+```
+
+e. Using the middle 95% approach yields the same result:
+```{r}
+qnorm(c(0.025, 0.0975), -13, 2)
+```
+
+f. They are the same, since the values are distributed symmetrically around the mean. Therefore, the middle 95% will be equivalent to the highest 95%. 
+
+## Exercise 8.9
+
+a. We'll use the method demonstrated in the textbook, and subtract 1 since we are testing for pi>0.4
+```{r}
+post_prob <- 1- pbeta(0.40, 4, 3)
+post_prob
+```
+
+b. We'll again use the formula for posterior odds given in the book
+```{r}
+post_odds <- post_prob/(1-post_prob)
+post_odds
+```
+
+c. Same formula as posterior odds but with prior probabilities
+
+```{r}
+prior_prob <- 1- pbeta(0.4, 1, 0.8)
+prior_odds <- prior_prob/(1-prior_prob)
+prior_odds
+```
+
+d. Bayes factor is the result of dividing the prior and posterior:
+```{r}
+post_odds/prior_odds
+```
+Since BF>1, the plausibility of the alternative hypothesis being true increased given the data. 
+
+e. The alternative hypothesis (pi>0.4) is more likely than the null hypothesis (pi<=0.4), and the greater probability of the alternative strengthens in light of the observed data. 
+
+## Exercise 8.10
+
+a. We'll use the method demonstrated in the textbook
+```{r}
+post_prob <- pnorm(0.52, 5, 3)
+post_prob
+```
+
+b. We'll again use the formula for posterior odds given in the book
+```{r}
+post_odds <- post_prob/(1-post_prob)
+post_odds
+```
+
+c. Same formula as posterior odds but with prior probabilities
+
+```{r}
+prior_prob <- pnorm(0.52, 10, 10)
+prior_odds <- prior_prob/(1-prior_prob)
+prior_odds
+```
+
+d. Bayes factor is the result of dividing the prior and posterior:
+```{r}
+post_odds/prior_odds
+```
+Since BF<1, the plausibility of the alternative hypothesis being true decreased given the data. 
+
+e. The alternative hypothesis (pi<0.52) is less likely than the null hypothesis (pi>=0.52), and the data strengthened the fact that the alternative hypothesis is less likely than the null hypothesis. 
+
+## Exercise 8.11 , 8.12, 8.13 
+require calculus?
+
+## Exercise 8.14
+
+a. Beta-Binomial, because pi will represent a fraction between 0 and 1 of the percentage of adults who don't believe in climate change. 
+
+b. Beta(1, 4): I think that most adults in the U.S. now believe in climate change. I would guess 1/4 (25%) of adults do not. 
+
+c. The authors are much more pessimistic.
+
+d. Loading data
+```{r}
+data(pulse_of_the_nation)
+```
+
+```{r}
+glimpse(pulse_of_the_nation)
+climate <- pulse_of_the_nation |> select(climate_change)
+climate
+```
+
+```{r}
+clim_count <- climate |> summarise(x=length(climate_change))
+
+not_real <- climate |> filter(climate_change=="Not Real At All") |> summarise(x=length(climate_change))
+
+```
+Calculate the sample proportion
+```{r}
+not_real/clim_count
+```
+e. Our posterior model of pi is as follows: 
+$$ Beta(16, 87)$$
+A middle 95% CI is as follows:
+```{r}
+qbeta(c(0.025, 0.0975), 16, 87)
+```
+
+
+
+
+
 
 
