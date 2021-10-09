@@ -203,22 +203,94 @@ climate
 
 ```{r}
 clim_count <- climate |> summarise(x=length(climate_change))
+clim_count
 
 not_real <- climate |> filter(climate_change=="Not Real At All") |> summarise(x=length(climate_change))
-
+not_real
 ```
 Calculate the sample proportion
 ```{r}
 not_real/clim_count
 ```
 e. Our posterior model of pi is as follows: 
-$$ Beta(16, 87)$$
+$$ Beta(151, 852)$$
 A middle 95% CI is as follows:
 ```{r}
-qbeta(c(0.025, 0.0975), 16, 87)
+qbeta(c(0.025, 0.0975), 151, 852)
 ```
 
 
+## Exercise 8.15
+
+a. It is more likely that pi is greater than 0.1 than pi is less than 0.1, since the entire 95% middle confidence interval is above 0.1.
+
+b. Calculating posterior probability of the alternative hypothesis:
+```{r}
+post_prob <- 1- pbeta(0.1, 151, 852)
+post_prob
+```
+
+It is highly likely (99%) that pi is greater than 0.1.
+
+c. Calculating the Bayes factor
+```{r}
+post_odds <- post_prob/(1-post_prob)
+
+prior_prob <- pbeta(0.1, 1, 2)
+prior_odds <- prior_prob/(1-prior_prob)
+
+post_odds/prior_odds
+```
+
+Since the Bayes factor is VERY much greater than 1, the plausibility of the alternative hypothesis being true increased with the data.
+
+d. Pi is likely to be greater than 0.1.
+
+## Exercise 8.16
+
+a. Building the MCMC model
+```{r}
+# STEP 1: DEFINE the model
+bb_model <- "
+  data {
+    int<lower = 0, upper = 1000> Y;
+  }
+  parameters {
+    real<lower = 0, upper = 1> pi;
+  }
+  model {
+    Y ~ binomial(1000, pi);
+    pi ~ beta(1, 2);
+  }
+"
+```
+
+```{r}
+library("rstan")
+# STEP 2: SIMULATE the posterior
+bb_sim <- stan(model_code = bb_model, data = list(Y = 150), 
+               chains = 4, iter = 5000*2, seed = 84735)
+```
+Illustrate the traces
+```{r}
+mcmc_trace(bb_sim, pars = "pi", size = 0.1)
+```
+
+## Exercise 8.17 
+
+## Exercise 8.18
+
+## Exercise 8.19
+
+## Exercise 8.20
+
+## Exercise 8.21
+
+## Exercise 8.22
+
+## Exercise 8.23
+
+## Exercise 8.24
 
 
 
