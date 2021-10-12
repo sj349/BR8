@@ -5,6 +5,9 @@ output: html_notebook
 ---
 
 ```{r}
+library(rstan)
+library(bayesplot)
+library(janitor)
 library(bayesrules)
 library(tidyverse)
 ```
@@ -216,7 +219,7 @@ e. Our posterior model of pi is as follows:
 $$ Beta(151, 852)$$
 A middle 95% CI is as follows:
 ```{r}
-qbeta(c(0.025, 0.0975), 151, 852)
+qbeta(c(0.025, 0.975), 151, 852)
 ```
 
 
@@ -242,7 +245,7 @@ prior_odds <- prior_prob/(1-prior_prob)
 post_odds/prior_odds
 ```
 
-Since the Bayes factor is VERY much greater than 1, the plausibility of the alternative hypothesis being true increased with the data.
+Since the Bayes factor is VERY much greater than 1, the plausibility of the alternative hypothesis being true greatly increased with the data.
 
 d. Pi is likely to be greater than 0.1.
 
@@ -266,7 +269,6 @@ bb_model <- "
 ```
 
 ```{r}
-library("rstan")
 # STEP 2: SIMULATE the posterior
 bb_sim <- stan(model_code = bb_model, data = list(Y = 150), 
                chains = 4, iter = 5000*2, seed = 84735)
@@ -277,10 +279,108 @@ mcmc_trace(bb_sim, pars = "pi", size = 0.1)
 ```
 
 ## Exercise 8.17 
+a. Approximating 95% confidence interval. First, we'll plot the data
+```{r}
+plot_beta(alpha = 151, beta = 852) + lims(x = c(0.1,0.2))
+
+# MCMC posterior approximation
+mcmc_dens(bb_sim, pars = "pi")
+```
+
+Now, we'll get the interval from the MCMC approximation
+
+```{r}
+bb_chains_df <- as.data.frame(bb_sim, pars = "lp__", include = FALSE)
+# Calculate posterior summaries of pi
+bb_chains_df %>% 
+  summarize(post_mean = mean(pi), 
+            post_median = median(pi),
+            post_mode = sample_mode(pi),
+            lower_95 = quantile(pi, 0.025),
+            upper_95 = quantile(pi, 0.975))
+```
+
+Now we'll find the same information using the tidy shortcut
+```{r}
+library(broom.mixed)
+tidy(bb_sim, conf.int = TRUE, conf.level = 0.95)
+```
+
+b. We'll use the method outlined in the book:
+```{r}
+bb_chains_df %>% 
+  mutate(exceeds = pi > 0.10) %>% 
+  tabyl(exceeds)
+```
+
+According to the MCMC model, all approximated values are greater than 0.1 (so there is a 100% chance that pi>0.1).
+
+c. The lower bound of the 95% confidence interval is very close to our estimates from 8.14 (0.12 to 0.17).
+
 
 ## Exercise 8.18
+a. We'll again follow the book's suggestions:
+```{r}
+set.seed(1)
+
+# Predict a value of Y' for each pi value in the chain
+bb_chains_df <- bb_chains_df %>% 
+  mutate(y_predict = rbinom(length(pi), size = 100, prob = pi))
+
+# Check it out
+bb_chains_df %>% 
+  head(3)
+
+# Plot the 20,000 predictions
+ggplot(bb_chains_df, aes(x = y_predict)) + 
+  stat_count()
+```
+b. The number of adults who don't believe in climate change, after adding 100 more into our sample pool, is most likely to range between 12 and 18.
+
+c. Finding probability that at least 20 don't believe in climate change
+NOTE: check methodology here
+
+```{r}
+denom <- bb_chains_df  %>% 
+  summarize(total=length(pi))
+
+nom <- bb_chains_df %>% 
+  filter(y_predict>=20) %>% 
+  summarize(total=length(pi))
+
+nom/denom
+
+```
 
 ## Exercise 8.19
+a. Normal-Normal, because measurments are likely to be symmetrical (like height)
+
+b. As shown below, Normal(200, 30) yields a majority of values between 140 and 260. 
+
+```{r}
+plot_normal(200, 30)
+```
+
+
+c. Calculating stats from penguins package
+```{r}
+data("penguins_bayes")
+glimpse(penguins_bayes)
+pengs <- penguins_bayes |> filter(species=="Adelie")
+pengs <- pengs |> drop_na()
+pengs |>  summarize(mean=mean(flipper_length_mm), num=length(flipper_length_mm), sd=sd(flipper_length_mm))
+```
+d. Posterior model
+```{r}
+summarize_normal_normal(mean=200, sd=5.48, sigma=42.5, y_bar=190.1, n=146)
+```
+
+
+Calculating 95% confidence interval:
+```{r}
+qnorm(c(0.025, 0.975), 192.99, 2.96^(2))
+```
+
 
 ## Exercise 8.20
 
