@@ -383,14 +383,173 @@ qnorm(c(0.025, 0.975), 192.99, 2.96^(2))
 
 
 ## Exercise 8.20
+a. Ha: mu in {200, 220}; Ho: mu is not in {200, 220}
+
+b. This hypothesis should be about 1/4 of 95% (since 1/2 of this range--200 to 210-- spans about 1/2 the confidence interval).
+
+c. Calculating the posterior probability of our hypothesis using the posterior developed from our MCMC approximation:
+```{r}
+post_prob_mu_greater_200 <- 1 - pnorm(200, 192.99, 2.96^(2))
+post_prob_mu_less_220 <- pnorm(220, 192.99, 2.96^(2))
+post_prob_mu_less_220*post_prob_mu_greater_200
+```
+
+Given that there's a 95% chance that mu is between 175 and 210 according to our confidence interval from 8.19, and the distribution is symmetric around 193, it makes sense that the likelihood that mu is >200 and <220 (which is outside the confidence interval) is around half of 45% (21.16%).
+
+d. Mu is likely to be around 193, and will most likely range between 175 and 210. About 20% of the time mu will be between 200 and 220.
 
 ## Exercise 8.21
+a. Gamma-Poison, because this is a count per hour that will likely be unsymmetrical in distribution.
+
+b. We'll use some equations from the textbook
+```{r}
+sd <- s^(1/2)/r
+mean <- s/r
+```
+Rearranging these formulas and subbing in 2 for the mean and 1 for the sd, we have: r=2, s=4.
+
+Therefore, the prior can be modelled as: Gamma(4, 2)
+
+c. Checking out loon data
+```{r}
+data("loons")
+glimpse(loons)
+loons <- loons |> drop_na()
+loons |>  summarize(mean=mean(count_per_100), num=length(count_per_100), sd=sd(count_per_100), sum=sum(count_per_100))
+```
+
+d. First, specify the posterior model:
+```{r}
+summarize_gamma_poisson(4, 2, 27, 18)
+```
+Calculating the 95% confidence interval:
+```{r}
+qgamma(c(0.025, 0.975), 31, 20)
+```
+The data, which has a mean (1.5) that is less than the prior mean (2), brings the posterior confidence interval down (ranging from 1.05 to 2.14).
 
 ## Exercise 8.22
+a. Ha: lambda is<1; Ho lambda is >=1
+
+b. The alternative hypothesis is unlikely considering that the lower bound of the 95% confidence interval is 1.05.
+
+c. Calculating probability of Ha:
+```{r}
+post_prob <- pnorm(1, 31, 20)
+post_prob
+```
+
+d. Lambda is likely to be greater than 1 (that is, the null hypothesis is likely to be true).
 
 ## Exercise 8.23
 
+a. Building the MCMC model
+```{r}
+# STEP 1: DEFINE the model
+bb_model <- "
+  data {
+    int<lower = 0, upper = 6> Y[18];
+  }
+  parameters {
+    real<lower = 0, upper = 6> lambda;
+  }
+  model {
+    Y ~ poisson(lambda);
+    lambda ~ gamma(4, 2);
+  }
+"
+```
+
+```{r}
+loons$count_per_100
+```
+
+
+```{r}
+# STEP 2: SIMULATE the posterior
+bb_sim <- stan(model_code = bb_model, data = list(Y = loons$count_per_100), chains = 4, iter = 5000*2, seed = 84735)
+```
+
+
+b. Performing some MCMC diagnostics:
+
+First, Illustrate the traces
+```{r}
+mcmc_trace(bb_sim, pars = "lambda", size = 0.1)
+```
+That looks like it's mixing well!
+
+Second, calculate the Neff ratio
+```{r}
+neff_ratio(bb_sim, pars = c("lambda"))
+```
+Since Neff>0.1, we consider this ratio adequate.
+
+c. Calculating confidence interval:
+First, we'll get the interval from the MCMC approximation
+
+```{r}
+bb_chains_df <- as.data.frame(bb_sim, pars = "lp__", include = FALSE)
+# Calculate posterior summaries of pi
+bb_chains_df %>% 
+  summarize(post_mean = mean(lambda), 
+            post_median = median(lambda),
+            post_mode = sample_mode(lambda),
+            lower_95 = quantile(lambda, 0.025),
+            upper_95 = quantile(lambda, 0.975))
+```
+
+Now we'll find the same information using the tidy shortcut
+```{r}
+library(broom.mixed)
+tidy(bb_sim, conf.int = TRUE, conf.level = 0.95)
+```
+d. Approximating probability that lambda <1. 
+
+```{r}
+bb_chains_df %>% 
+  mutate(exceeds = lambda < 1) %>% 
+  tabyl(exceeds)
+```
+
+e. The confidence interval is nearly exactly the same as that calculated in 8.21. The probabilty that lambda<1 is a bit lower in the approximation (0.014) than it was based on the posterior model estimate (0.06).
+
+
 ## Exercise 8.24
+a. Approximating the posterior predictive model:
+
+```{r}
+set.seed(1)
+
+# Predict a value of Y' for each lambda value in the chain
+bb_chains_df <- bb_chains_df %>% 
+  mutate(y_predict = rgamma(n=length(lambda), shape=lambda))
+
+# Check it out
+bb_chains_df %>% 
+  head(3)
+
+# Plot the 20,000 predictions
+ggplot(bb_chains_df, aes(x = y_predict)) + 
+  stat_count()
+```
+b. The number of birds a birdwatcher will most likely observe in their next watching period is...
+
+c. Finding probability that 0 birds are seen in next period:
+NOTE: check methodology here
+
+```{r}
+denom <- bb_chains_df  %>% 
+  summarize(total=length(pi))
+
+nom <- bb_chains_df %>% 
+  filter(y_predict>=20) %>% 
+  summarize(total=length(pi))
+
+nom/denom
+
+```
+
 
 
 
