@@ -1,7 +1,9 @@
 ---
 title: "BR8"
 author: "Steph Jordan"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r}
@@ -508,8 +510,8 @@ d. Approximating probability that lambda <1.
 
 ```{r}
 bb_chains_df %>% 
-  mutate(exceeds = lambda < 1) %>% 
-  tabyl(exceeds)
+  mutate(lesser = lambda < 1) %>% 
+  tabyl(lesser)
 ```
 
 e. The confidence interval is nearly exactly the same as that calculated in 8.21. The probabilty that lambda<1 is a bit lower in the approximation (0.014) than it was based on the posterior model estimate (0.06).
@@ -527,12 +529,13 @@ bb_chains_df <- bb_chains_df %>%
 
 # Check it out
 bb_chains_df %>% 
-  head(3)
+  head(100)
 
 # Plot the 20,000 predictions
 ggplot(bb_chains_df, aes(x = y_predict)) + 
   stat_count()
 ```
+
 b. The number of birds a birdwatcher will most likely observe in their next watching period is...
 
 c. Finding probability that 0 birds are seen in next period:
@@ -540,11 +543,11 @@ NOTE: check methodology here
 
 ```{r}
 denom <- bb_chains_df  %>% 
-  summarize(total=length(pi))
+  summarize(total=length(lambda))
 
 nom <- bb_chains_df %>% 
-  filter(y_predict>=20) %>% 
-  summarize(total=length(pi))
+  filter(y_predict==0) %>% 
+  summarize(total=length(lambda))
 
 nom/denom
 
