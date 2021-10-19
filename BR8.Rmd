@@ -2,6 +2,7 @@
 title: "BR8"
 author: "Steph Jordan"
 output:
+  pdf_document: default
   html_document:
     df_print: paged
 ---
@@ -184,16 +185,13 @@ Since BF<1, the plausibility of the alternative hypothesis being true decreased 
 
 e. The alternative hypothesis (pi<0.52) is less likely than the null hypothesis (pi>=0.52), and the data strengthened the fact that the alternative hypothesis is less likely than the null hypothesis. 
 
-## Exercise 8.11 , 8.12, 8.13 
-require calculus?
-
 ## Exercise 8.14
 
 a. Beta-Binomial, because pi will represent a fraction between 0 and 1 of the percentage of adults who don't believe in climate change. 
 
 b. Beta(1, 4): I think that most adults in the U.S. now believe in climate change. I would guess 1/4 (25%) of adults do not. 
 
-c. The authors are much more pessimistic.
+c. The authors are much more pessimistic; they believe a greater percentage of US adults do not believe in climate change. 
 
 d. Loading data
 ```{r}
@@ -256,7 +254,7 @@ d. Pi is likely to be greater than 0.1.
 a. Building the MCMC model
 ```{r}
 # STEP 1: DEFINE the model
-bb_model <- "
+bb_model <- '
   data {
     int<lower = 0, upper = 1000> Y;
   }
@@ -267,10 +265,10 @@ bb_model <- "
     Y ~ binomial(1000, pi);
     pi ~ beta(1, 2);
   }
-"
+'
 ```
 
-```{r}
+```{r, results='hide'}
 # STEP 2: SIMULATE the posterior
 bb_sim <- stan(model_code = bb_model, data = list(Y = 150), 
                chains = 4, iter = 5000*2, seed = 84735)
@@ -355,7 +353,7 @@ nom/denom
 ```
 
 ## Exercise 8.19
-a. Normal-Normal, because measurments are likely to be symmetrical (like height)
+a. Normal-Normal, because measurements are likely to be symmetrical (like height)
 
 b. As shown below, Normal(200, 30) yields a majority of values between 140 and 260. 
 
@@ -404,11 +402,11 @@ d. Mu is likely to be around 193, and will most likely range between 175 and 210
 a. Gamma-Poison, because this is a count per hour that will likely be unsymmetrical in distribution.
 
 b. We'll use some equations from the textbook
-```{r}
-sd <- s^(1/2)/r
-mean <- s/r
-```
-Rearranging these formulas and subbing in 2 for the mean and 1 for the sd, we have: r=2, s=4.
+
+$$ sd = s^{1/2}/r $$
+$$ mean = s/r $$ 
+
+Rearranging these formulas and subbing in 2 for the mean and 1 for the sd, we have: **r=2, s=4**.
 
 Therefore, the prior can be modelled as: Gamma(4, 2)
 
@@ -514,7 +512,7 @@ bb_chains_df %>%
   tabyl(lesser)
 ```
 
-e. The confidence interval is nearly exactly the same as that calculated in 8.21. The probabilty that lambda<1 is a bit lower in the approximation (0.014) than it was based on the posterior model estimate (0.06).
+e. The confidence interval is nearly exactly the same as that calculated in 8.21. The probability that lambda<1 is a bit lower in the approximation (0.014) than it was based on the posterior model estimate (0.06).
 
 
 ## Exercise 8.24
@@ -525,7 +523,7 @@ set.seed(1)
 
 # Predict a value of Y' for each lambda value in the chain
 bb_chains_df <- bb_chains_df %>% 
-  mutate(y_predict = rgamma(n=length(lambda), shape=lambda))
+  mutate(y_predict = rpois(length(lambda), lambda))
 
 # Check it out
 bb_chains_df %>% 
@@ -536,7 +534,7 @@ ggplot(bb_chains_df, aes(x = y_predict)) +
   stat_count()
 ```
 
-b. The number of birds a birdwatcher will most likely observe in their next watching period is...
+b. The number of birds a birdwatcher will most likely observe in their next watching period is 1. 
 
 c. Finding probability that 0 birds are seen in next period:
 NOTE: check methodology here
@@ -552,9 +550,6 @@ nom <- bb_chains_df %>%
 nom/denom
 
 ```
-
-
-
 
 
 
