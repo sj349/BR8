@@ -338,7 +338,7 @@ ggplot(bb_chains_df, aes(x = y_predict)) +
 b. The number of adults who don't believe in climate change, after adding 100 more into our sample pool, is most likely to range between 12 and 18.
 
 c. Finding probability that at least 20 don't believe in climate change
-NOTE: check methodology here
+NOTE: not sure methodology here
 
 ```{r}
 denom <- bb_chains_df  %>% 
@@ -355,10 +355,10 @@ nom/denom
 ## Exercise 8.19
 a. Normal-Normal, because measurements are likely to be symmetrical (like height)
 
-b. As shown below, Normal(200, 30) yields a majority of values between 140 and 260. 
+b. As shown below, Normal(200, 30^(1/2)) yields a majority of values between 140 and 260. 
 
 ```{r}
-plot_normal(200, 30)
+plot_normal(200, 30^(1/2))
 ```
 
 
@@ -372,13 +372,13 @@ pengs |>  summarize(mean=mean(flipper_length_mm), num=length(flipper_length_mm),
 ```
 d. Posterior model
 ```{r}
-summarize_normal_normal(mean=200, sd=5.48, sigma=42.5, y_bar=190.1, n=146)
+summarize_normal_normal(mean=200, sd=5.48, sigma=6.52, y_bar=190.1, n=146)
 ```
 
 
 Calculating 95% confidence interval:
 ```{r}
-qnorm(c(0.025, 0.975), 192.99, 2.96^(2))
+qnorm(c(0.025, 0.975), 190.1951, 0.537)
 ```
 
 
@@ -389,14 +389,14 @@ b. This hypothesis should be about 1/4 of 95% (since 1/2 of this range--200 to 2
 
 c. Calculating the posterior probability of our hypothesis using the posterior developed from our MCMC approximation:
 ```{r}
-post_prob_mu_greater_200 <- 1 - pnorm(200, 192.99, 2.96^(2))
-post_prob_mu_less_220 <- pnorm(220, 192.99, 2.96^(2))
+post_prob_mu_greater_200 <- 1 - pnorm(200, 190.1951, 0.537)
+post_prob_mu_less_220 <- pnorm(220, 190.1951, 0.537)
 post_prob_mu_less_220*post_prob_mu_greater_200
 ```
 
-Given that there's a 95% chance that mu is between 175 and 210 according to our confidence interval from 8.19, and the distribution is symmetric around 193, it makes sense that the likelihood that mu is >200 and <220 (which is outside the confidence interval) is around half of 45% (21.16%).
+Given that there's a 95% chance that mu is between 189 and 191 according to our confidence interval from 8.19, and there is a mean of 191, it makes sense that there would be a 0% chance of mu being between 200 and 220.
 
-d. Mu is likely to be around 193, and will most likely range between 175 and 210. About 20% of the time mu will be between 200 and 220.
+d. Mu is likely to be around 191, and will most likely range between 189 and 191. 
 
 ## Exercise 8.21
 a. Gamma-Poison, because this is a count per hour that will likely be unsymmetrical in distribution.
@@ -439,7 +439,7 @@ post_prob <- pnorm(1, 31, 20)
 post_prob
 ```
 
-d. Lambda is likely to be greater than 1 (that is, the null hypothesis is likely to be true).
+d. Lambda is much more likely to be greater than 1 (that is, the null hypothesis is likely to be true).
 
 ## Exercise 8.23
 
@@ -537,7 +537,7 @@ ggplot(bb_chains_df, aes(x = y_predict)) +
 b. The number of birds a birdwatcher will most likely observe in their next watching period is 1. 
 
 c. Finding probability that 0 birds are seen in next period:
-NOTE: check methodology here
+NOTE: not sure on methodology here
 
 ```{r}
 denom <- bb_chains_df  %>% 
